@@ -19,7 +19,7 @@ dependencies:
   flutter:
     sdk: flutter
   onnxruntime: ^1.4.1
-  record: ^6.0.0
+  record: 6.0.0
 
 
 dev_dependencies:

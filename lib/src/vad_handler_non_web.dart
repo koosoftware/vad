@@ -36,8 +36,10 @@ class VadHandlerNonWeb implements VadHandlerBase {
   static const String vadV5ModelPath = 'packages/vad/assets/silero_vad_v5.onnx';
 
   final _onSpeechEndController = StreamController<List<double>>.broadcast();
-  final _onFrameProcessedController = StreamController<
-      ({double isSpeech, double notSpeech, List<double> frame})>.broadcast();
+  final _onFrameProcessedController =
+      StreamController<
+        ({double isSpeech, double notSpeech, List<double> frame})
+      >.broadcast();
   final _onSpeechStartController = StreamController<void>.broadcast();
   final _onRealSpeechStartController = StreamController<void>.broadcast();
   final _onVADMisfireController = StreamController<void>.broadcast();
@@ -48,7 +50,7 @@ class VadHandlerNonWeb implements VadHandlerBase {
 
   @override
   Stream<({double isSpeech, double notSpeech, List<double> frame})>
-      get onFrameProcessed => _onFrameProcessedController.stream;
+  get onFrameProcessed => _onFrameProcessedController.stream;
 
   @override
   Stream<void> get onSpeechStart => _onSpeechStartController.stream;
@@ -69,7 +71,8 @@ class VadHandlerNonWeb implements VadHandlerBase {
   void _handleVadEvent(VadEvent event) {
     if (isDebug) {
       debugPrint(
-          'VadHandlerNonWeb: VAD Event: ${event.type} with message ${event.message}');
+        'VadHandlerNonWeb: VAD Event: ${event.type} with message ${event.message}',
+      );
     }
     switch (event.type) {
       case VadEventType.start:
@@ -90,7 +93,7 @@ class VadHandlerNonWeb implements VadHandlerBase {
           _onFrameProcessedController.add((
             isSpeech: event.probabilities!.isSpeech,
             notSpeech: event.probabilities!.notSpeech,
-            frame: event.frameData!
+            frame: event.frameData!,
           ));
         }
         break;
@@ -104,18 +107,19 @@ class VadHandlerNonWeb implements VadHandlerBase {
   }
 
   @override
-  Future<void> startListening(
-      {double positiveSpeechThreshold = 0.5,
-      double negativeSpeechThreshold = 0.35,
-      int preSpeechPadFrames = 1,
-      int redemptionFrames = 8,
-      int frameSamples = 1536,
-      int minSpeechFrames = 3,
-      bool submitUserSpeechOnPause = false,
-      String model = 'legacy',
-      String baseAssetPath = 'assets/packages/vad/assets/',
-      String onnxWASMBasePath = 'assets/packages/vad/assets/',
-      RecordConfig? recordConfig}) async {
+  Future<void> startListening({
+    double positiveSpeechThreshold = 0.5,
+    double negativeSpeechThreshold = 0.35,
+    int preSpeechPadFrames = 1,
+    int redemptionFrames = 8,
+    int frameSamples = 1536,
+    int minSpeechFrames = 3,
+    bool submitUserSpeechOnPause = false,
+    String model = 'legacy',
+    String baseAssetPath = 'assets/packages/vad/assets/',
+    String onnxWASMBasePath = 'assets/packages/vad/assets/',
+    RecordConfig? recordConfig,
+  }) async {
     // If we're paused, just resume processing
     if (_isPaused && _audioStreamSubscription != null) {
       if (isDebug) debugPrint('VadHandlerNonWeb: Resuming from paused state');
@@ -151,8 +155,9 @@ class VadHandlerNonWeb implements VadHandlerBase {
 
     bool hasPermission = await _audioRecorder.hasPermission();
     if (!hasPermission) {
-      _onErrorController
-          .add('VadHandlerNonWeb: No permission to record audio.');
+      _onErrorController.add(
+        'VadHandlerNonWeb: No permission to record audio.',
+      );
       if (isDebug) {
         debugPrint('VadHandlerNonWeb: No permission to record audio.');
       }
@@ -163,15 +168,17 @@ class VadHandlerNonWeb implements VadHandlerBase {
     _isPaused = false;
 
     // Start recording with a stream
-    final config = recordConfig ??
+    final config =
+        recordConfig ??
         const RecordConfig(
-            encoder: AudioEncoder.pcm16bits,
-            sampleRate: sampleRate,
-            bitRate: 16,
-            numChannels: 1,
-            echoCancel: true,
-            autoGain: true,
-            noiseSuppress: true);
+          encoder: AudioEncoder.pcm16bits,
+          sampleRate: sampleRate,
+          bitRate: 16,
+          numChannels: 1,
+          //echoCancel: true,
+          autoGain: true,
+          noiseSuppress: true,
+        );
     final stream = await _audioRecorder.startStream(config);
 
     _audioStreamSubscription = stream.listen((data) async {
